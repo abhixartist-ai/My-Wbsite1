@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Dashboard</title>
+<style>
+/* 🔹 Reset & Base */
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:auto; font-family:"Poppins", sans-serif; background: linear-gradient(120deg, #0a3d62, #3c6382); color:white; }
+
+/* 🔹 Container */
+.container { position:relative; width:100%; height:100%; }
+
+/* 🔹 Hero Section */
+.hero {
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  text-align:center;
+  background: rgba(255,255,255,0.1);
+  padding:40px;
+  border-radius:20px;
+  box-shadow:0 4px 25px rgba(0,0,0,0.3);
+  width:70%;
+  max-width:700px;
+  transition: all 1s ease;
+  z-index:2;
+}
+.hero.move-top {
+  top:5%;
+  transform: translate(-50%, 0);
+}
+h1 { font-size:2.4rem; margin-bottom:10px; }
+h2 { font-size:1.1rem; color:#b8e994; margin-bottom:15px; }
+p { font-size:1rem; color:#ecf0f1; line-height:1.6; margin-bottom:15px; }
+.tagline { font-style:italic; font-size:1.1rem; color:#82ccdd; margin-bottom:20px; }
+
+/* 🔹 Button */
+.btn { background:#60a3bc; color:white; border:none; padding:12px 30px; border-radius:25px; cursor:pointer; font-weight:600; transition:0.3s; }
+.btn:hover { background:#3c6382; box-shadow:0 0 10px #82ccdd; }
+.btn.hide { display:none; }
+
+/* 🔹 Table Section */
+.table-section {
+  position:absolute;
+  top:100%; /* Start below screen */
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  opacity:0;
+  transition: all 1s ease;
+}
+.table-section.show {
+  top:55%; /* Hero top + spacing */
+  opacity:1;
+}
+
+/* 🔹 Table Styling */
+table {
+  border-collapse:collapse;
+  width:85%;
+  background: transparent;
+  text-align:center;
+}
+th { text-align:left; font-size:20px; padding-left:10px; color:white; }
+th, td { border-top:1px solid white; border-bottom:1px solid white; padding:10px; }
+
+button.copy-btn { background:#60a3bc; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-weight:600; transition:0.3s; }
+button.copy-btn:hover { background:#3c6382; box-shadow:0 0 10px #82ccdd; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero Section -->
+  <div class="hero" id="hero">
+    <h1>Smart Audit Data Management</h1>
+    <h2>Secure • Organized • Insightful</h2>
+    <p>Manage your audit data effortlessly with secure storage and instant access for all your audit processes.</p>
+    <div class="tagline">“Where Accuracy Meets Security.”</div>
+    <button type="button" class="btn" id="getStartedBtn">Get Started</button>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-section" id="tableSection">
+    <table>
+      <tr>
+        <th>Open RO audit</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+      </tr>
+      <tr>
+        <th>Vehicle Stock Verification</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+      <tr>
+        <th>Accessories Verification</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row3M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row3T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+      <tr>
+        <th>Cash Verification</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+      <tr>
+        <th>Spare Parts Verification</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+      <tr>
+        <th>Sales Vouching</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+      <tr>
+        <th>Service Vouching</th>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row2T')">T</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1M')">M</button></td>
+        <td><button class="copy-btn" onclick="copyCode(this,'row1T')">T</button></td>
+
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+
+// 🔹 Copy function
+function copyCode(btn, codeKey){
+  const code = auditCodes[codeKey];
+  navigator.clipboard.writeText(code);
+  let originalColor = btn.style.backgroundColor;
+  btn.style.backgroundColor = "lightgreen";
+  setTimeout(()=>{ btn.style.backgroundColor = originalColor; },800);
+}
+
+// 🔹 Hero + Table animation
+const getStartedBtn = document.getElementById("getStartedBtn");
+const hero = document.getElementById("hero");
+const table = document.getElementById("tableSection");
+
+function startAnimation(){
+  hero.classList.add("move-top");   // Hero moves to top
+  getStartedBtn.classList.add("hide"); // Hide button
+  table.classList.add("show");      // Table slides + fades in
+}
+
+// 🔹 Click event
+getStartedBtn.addEventListener("click", startAnimation);
+
+// 🔹 Enter key support
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter" && !getStartedBtn.classList.contains("hide")){
+    startAnimation();
+  }
+});
+// 🔹 Centralized code object
+const auditCodes = {
+  row1M: "Code1fdfdA",
+  row1T: "Code1B",
+  row2M: "Code2A",
+  row2T: "Code2B",
+  row3M: "Code3A",
+  row3T: "Code3B"
+};
+
+</script>
+
+</body>
+</html>
