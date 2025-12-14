@@ -1,171 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audit Dashboard</title>
-<style>
-/* Reset & Base */
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow:hidden; font-family:"Poppins", sans-serif; background: linear-gradient(120deg, #0a3d62, #3c6382); color:white; }
-
-/* Container for full screen */
-.container { position:relative; width:100%; height:100%; }
-
-/* Hero Section */
-.hero {
-  position: absolute;
-  top:50%;
-  left:50%;
-  transform: translate(-50%, -50%);
-  text-align:center;
-  background: rgba(255,255,255,0.1);
-  padding:40px;
-  border-radius:20px;
-  box-shadow:0 4px 25px rgba(0,0,0,0.3);
-  width:70%;
-  max-width:700px;
-  transition: all 1s ease;
-  z-index:2;
-}
-
-.hero.move-top {
-  top:6%;
-  transform: translate(-50%, 0);
-}
-
-/* Hero Text Styling */
-h1 { font-size:2.4rem; margin-bottom:10px; }
-h2 { font-size:1.1rem; color:#b8e994; margin-bottom:15px; }
-p { font-size:1rem; color:#ecf0f1; line-height:1.6; margin-bottom:15px; }
-.tagline { font-style:italic; font-size:1.1rem; color:#82ccdd; margin-bottom:20px; }
-
-/* Button */
-.btn { background:#60a3bc; color:white; border:none; padding:12px 30px; border-radius:25px; cursor:pointer; font-weight:600; transition:0.3s; }
-.btn:hover { background:#3c6382; box-shadow:0 0 10px #82ccdd; }
-.btn.hide { display:none; }
-
-/* Table Section */
-.table-section {
-  position:absolute;
-  top:100%; /* Start below screen */
-  left:0;
-  width:100%;
-  height:auto;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  opacity:0;
-  transition: all 1s ease;
-}
-
-.table-section.show {
-  top:50%; /* Hero top 10% + table margin */
-  opacity:1;
-}
-
-/* Table Styling */
-table {
-  border-collapse:collapse;
-  width:85%;
-  background: transparent;
-  text-align:center;
-}
-
-th { text-align:left; font-size:20px; padding-left:10px; color:white; }
-th, td { border-top:1px solid white; border-bottom:1px solid white; padding:10px; }
-
-button.copy-btn { background:#60a3bc; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-weight:600; transition:0.3s; }
-
-button.copy-btn:hover { background:#3c6382; box-shadow:0 0 10px #82ccdd; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Chassis Verification</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    tr.single-found { background-color: #c6f6c6 !important; } /* green - permanent */
+    tr.duplicate-found { background-color: #fff3b3 !important; } /* yellow - temporary */
+    #statusBox { width: 230px; height: 28px; margin-bottom: 10px; font-weight: bold; text-align: center; color: white; line-height: 28px; }
+  </style>
 </head>
-<body>
+<body><h2>Stock Physical Verification</h2><div id="statusBox">Status</div>
+<input type="file" id="fileInput" accept=".xlsx,.xls" />
+<span id="fileName" style="margin-left:10px;font-weight:bold;color:#333"></span>
+<br><br>
+<input type="text" id="searchBox" placeholder="Enter Chassis Number" />
+<button onclick="searchChassis()">Verify</button>
+<button onclick="downloadExcelWithSummary()">Save & Summary</button><table id="dataTable"></table><!-- xlsx-js-style is required to SAVE COLORS in Excel --><script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script><script>
+let excelData = [];
 
-<div class="container">
+fileInput.onchange = function(e) {
+  const fileLabel = document.getElementById('fileName');
+  if (e.target.files.length > 0) {
+    fileLabel.innerText = 'Loaded: ' + e.target.files[0].name;
+  } else {
+    fileLabel.innerText = '';
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    excelData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    renderTable();
+  };
+  reader.readAsArrayBuffer(e.target.files[0]);
+};
 
-  <!-- Hero Section -->
-  <div class="hero" id="hero">
-    <h1>Smart Audit Data Management</h1>
-    <h2>Secure • Organized • Insightful</h2>
-    <p>Manage your audit data effortlessly with secure storage and instant access for all your audit processes.</p>
-    <div class="tagline">“Where Accuracy Meets Security.”</div>
-    <button class="btn" id="getStartedBtn">Get Started</button>
-  </div>
-
-  <!-- Table Section -->
-  <div class="table-section" id="tableSection">
-    <table>
-      <tr>
-        <th>Open RO audit</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'CodeA1')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code1B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code1C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code1D')">T</button></td>
-      </tr>
-      <tr>
-        <th>Vehicle Stock Verification</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code2A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code2B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code2C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code2D')">T</button></td>
-      </tr>
-      <tr>
-        <th>Accessories Verification</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3D')">T</button></td>
-      </tr>
-      <tr>
-        <th>Cash Verification</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3D')">T</button></td>
-      </tr>
-      <tr>
-        <th>spares Parts Verification</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3D')">T</button></td>
-      </tr>
-      <tr>
-        <th>Service Vouching</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3D')">T</button></td>
-      </tr>
-      <tr>
-        <th>Sales Vouching</th>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3A')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3B')">M</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3C')">T</button></td>
-        <td><button class="copy-btn" onclick="copyCode(this,'Code3D')">T</button></td>
-      </tr>
-    </table>
-  </div>
-
-</div>
-
-<script>
-document.getElementById("getStartedBtn").addEventListener("click", function(){
-  const hero = document.getElementById("hero");
-  const table = document.getElementById("tableSection");
-
-  hero.classList.add("move-top"); // Hero moves up
-  this.classList.add("hide");     // Hide button
-  table.classList.add("show");    // Table slides & fades in simultaneously
-});
-
-function copyCode(btn, code){
-  navigator.clipboard.writeText(code);
-  let originalColor = btn.style.backgroundColor;
-  btn.style.backgroundColor = "lightgreen";
-  setTimeout(()=>{ btn.style.backgroundColor = originalColor; },800);
+function renderTable() {
+  const table = document.getElementById('dataTable');
+  table.style.display = 'table';
+  const table = document.getElementById('dataTable');
+  table.innerHTML = '';
+  excelData.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    row.forEach(cell => {
+      const td = document.createElement(i === 0 ? 'th' : 'td');
+      td.innerText = cell;
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
 }
-</script>
-</body>
+
+function searchChassis() {
+  const val = document.getElementById('searchBox').value.trim();
+  if(val === '') return;
+
+  const rows = document.querySelectorAll('#dataTable tr');
+  const statusBox = document.getElementById('statusBox');
+
+  // 🔁 Remove ONLY previous temporary yellow highlights
+  rows.forEach((tr, i) => {
+    if(i === 0) return;
+    if(!tr.classList.contains('single-found')) {
+      tr.classList.remove('duplicate-found');
+    }
+  });
+
+  let matchedRows = [];
+
+  rows.forEach((tr, i) => {
+    if(i === 0) return;
+    const cell = tr.querySelector('td:nth-child(2)');
+    if(cell && cell.innerText.includes(val)) {
+      matchedRows.push(tr);
+    }
+  });
+
+  if(matchedRows.length === 0) {
+    statusBox.innerText = 'Not Found';
+    statusBox.style.backgroundColor = 'red';
+    return;
+  }
+
+  if(matchedRows.length === 1) {
+    statusBox.innerText = 'Verified';
+    statusBox.style.backgroundColor = 'green';
+    matchedRows[0].classList.add('single-found'); // permanent green
+    matchedRows[0].classList.remove('duplicate-found');
+  } else {
+    statusBox.innerText = 'Duplicate';
+    statusBox.style.backgroundColor = 'orange';
+    matchedRows.forEach(tr => {
+      if(!tr.classList.contains('single-found')) {
+        tr.classList.add('duplicate-found'); // temporary yellow
+      }
+    });
+  }
+}
+
+function downloadExcelWithSummary() {
+  const table = document.getElementById('dataTable');
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(table);
+  const range = XLSX.utils.decode_range(ws['!ref']);
+
+  let verified = 0, duplicate = 0;
+
+  for (let r = 1; r <= range.e.r; r++) {
+    const tr = table.rows[r];
+    let fill = null;
+
+    if (tr.classList.contains('single-found')) {
+      fill = { fgColor: { rgb: 'C6F6C6' } };
+      verified++;
+    } else if (tr.classList.contains('duplicate-found')) {
+      fill = { fgColor: { rgb: 'FFF3B3' } };
+      duplicate++;
+    }
+
+    if (fill) {
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+        if (ws[cellRef]) ws[cellRef].s = { fill };
+      }
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Verification');
+
+  const summaryData = [
+    ['Summary'],
+    ['Verified (Green)', verified],
+    ['Duplicate (Yellow)', duplicate],
+    ['Total Rows', table.rows.length - 1]
+  ];
+
+  const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+  XLSX.writeFile(wb, 'verified_stock_with_summary.xlsx');
+}
+
+    // Save color status
+    if (i === 0) {
+      row.push('ColorStatus');
+    } else {
+      const tr = table.rows[i];
+      if (tr.classList.contains('single-found')) row.push('GREEN');
+      else if (tr.classList.contains('duplicate-found')) row.push('YELLOW');
+      else row.push('');
+    }
+
+    csv.push(row.join(','));
+  }
+
+  const blob = new Blob([csv.join('
+')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'verified_stock.csv';
+  a.click();
+}
+</script></body>
 </html>
